@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QFileDialog>
+#include <QMessageBox>
+#include <QTextStream>
 
 namespace Ui {
 class AhpWindow;
@@ -20,6 +22,13 @@ public slots:
 
 private:
     Ui::AhpWindow *ui;
+
+    qreal macierz_preferencji[5][5];
+
+	QStringList macierz_wyboru_nazwa;
+	qreal macierz_wyboru[5][5][5];
+
+
 };
 
 #endif // AHPWINDOW_H

@@ -18,3 +18,10 @@ SOURCES += main.cpp\
 HEADERS  += ahpwindow.h
 
 FORMS    += ahpwindow.ui
+
+OTHER_FILES += \
+    ku880.ahp \
+    ke770.ahp \
+    l7.ahp \
+    ke850.ahp \
+    nexus5.ahp
