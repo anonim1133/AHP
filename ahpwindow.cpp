@@ -6,6 +6,8 @@ AhpWindow::AhpWindow(QWidget *parent) :
     ui(new Ui::AhpWindow)
 {
     ui->setupUi(this);
+	memset(macierz_preferencji, 0, sizeof macierz_preferencji);
+	memset(macierz_wyboru, 0, sizeof macierz_wyboru);
 }
 
 AhpWindow::~AhpWindow()
@@ -49,4 +51,49 @@ void AhpWindow::openFile(){
 		i++;
 	}
 
+}
+
+void AhpWindow::cena2bateria(int value){
+	macierz_preferencji[2][1] = value;
+	macierz_preferencji[1][2] = (qreal)1/(qreal)value;
+}
+
+void AhpWindow::cena2aparat(int value){
+	macierz_preferencji[2][0] = value;
+	macierz_preferencji[0][2] = (qreal)1/(qreal)value;
+}
+void AhpWindow::cena2wyswietlacz(int value){
+	macierz_preferencji[2][4] = value;
+	macierz_preferencji[4][2] = (qreal)1/(qreal)value;
+}
+void AhpWindow::cena2rozmiar(int value){
+	macierz_preferencji[2][3] = value;
+	macierz_preferencji[3][2] = (qreal)1/(qreal)value;
+}
+
+void AhpWindow::bateria2aparat(int value){
+	macierz_preferencji[1][0] = value;
+	macierz_preferencji[0][1] = (qreal)1/(qreal)value;
+}
+void AhpWindow::bateria2wyswietlacz(int value){
+	macierz_preferencji[1][4] = value;
+	macierz_preferencji[4][1] = (qreal)1/(qreal)value;
+}
+void AhpWindow::bateria2rozmiar(int value){
+	macierz_preferencji[1][3] = value;
+	macierz_preferencji[3][1] = (qreal)1/(qreal)value;
+}
+
+void AhpWindow::aparat2wyswietlacz(int value){
+	macierz_preferencji[0][4] = value;
+	macierz_preferencji[4][0] = (qreal)1/(qreal)value;
+}
+void AhpWindow::aparat2rozmiar(int value){
+	macierz_preferencji[0][3] = value;
+	macierz_preferencji[3][0] = (qreal)1/(qreal)value;
+}
+
+void AhpWindow::wyswietlacz2rozmiar(int value){
+	macierz_preferencji[4][3] = value;
+	macierz_preferencji[3][4] = (qreal)1/(qreal)value;
 }

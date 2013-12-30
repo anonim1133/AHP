@@ -24,4 +24,9 @@ OTHER_FILES += \
     ke770.ahp \
     l7.ahp \
     ke850.ahp \
-    nexus5.ahp
+    nexus5.ahp \
+    dane/nexus5.ahp \
+    dane/l7.ahp \
+    dane/ku880.ahp \
+    dane/ke850.ahp \
+    dane/ke770.ahp
