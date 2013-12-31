@@ -20,6 +20,8 @@ public:
 public slots:
 	void openFile();
 
+	qint8 oblicz();
+
 	void cena2bateria(int value);
 	void cena2aparat(int value);
 	void cena2wyswietlacz(int value);
@@ -39,8 +41,8 @@ private:
 
 	qreal macierz_preferencji[5][5];
 
-	QStringList macierz_wyboru_nazwa;
-	qreal macierz_wyboru[5][5][5];
+	QString macierz_kryteriow_wlasciwosci[5][3];
+	qreal macierz_kryteriow[5][5][5];
 
 
 };

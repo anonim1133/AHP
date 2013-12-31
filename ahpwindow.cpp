@@ -6,8 +6,8 @@ AhpWindow::AhpWindow(QWidget *parent) :
     ui(new Ui::AhpWindow)
 {
     ui->setupUi(this);
-	memset(macierz_preferencji, 0, sizeof macierz_preferencji);
-	memset(macierz_wyboru, 0, sizeof macierz_wyboru);
+	memset(macierz_preferencji, 1, sizeof macierz_preferencji);
+	memset(macierz_kryteriow, 0, sizeof macierz_kryteriow);
 }
 
 AhpWindow::~AhpWindow()
@@ -30,7 +30,11 @@ void AhpWindow::openFile(){
 								  QMessageBox::Ok | QMessageBox::Default);
 			QTextStream stream( &file );
 
-			macierz_wyboru_nazwa.append(stream.readLine());
+			str = stream.readLine();
+			QStringList wlasciwosci = str.split(";");
+			macierz_kryteriow_wlasciwosci[i][1] = wlasciwosci.at(1);
+			macierz_kryteriow_wlasciwosci[i][2] = wlasciwosci.at(2);
+			macierz_kryteriow_wlasciwosci[i][3] = wlasciwosci.at(3);
 
 			while( !stream.atEnd() ) {
 				str = stream.readLine();
@@ -41,7 +45,7 @@ void AhpWindow::openFile(){
 				QStringList wartosci = str.split(",");
 
 				foreach (QString var, wartosci) {
-					macierz_wyboru[i][j][k] = var.toInt();
+					macierz_kryteriow[i][j][k] = var.toInt();
 					k++;
 				}
 
@@ -51,6 +55,63 @@ void AhpWindow::openFile(){
 		i++;
 	}
 
+}
+
+qint8 AhpWindow::oblicz(){
+	//normalizacja
+	//Wyrazy w kolumnie dzielić przez sumę wartości w kolumnie
+	qreal c[5] = {0};
+
+	for(short i = 0; i < 5; i++)
+		for(short j = 0; j < 5; j++)
+			c[i] += macierz_preferencji[j][i];
+
+	for(short i = 0; i < 5; i++)
+		for(short j = 0; j < 5; j++)
+			macierz_preferencji[i][j] = macierz_preferencji[i][j]/c[j];
+
+	for(short a = 0; a < 5; a++){
+		for(short i = 0; i < 5; i++)
+			for(short j = 0; j < 5; j++)
+				c[i] += macierz_kryteriow[a][j][i];
+
+		for(short i = 0; i < 5; i++)
+			for(short j = 0; j < 5; j++)
+				macierz_kryteriow[a][i][j] = macierz_kryteriow[a][i][j]/c[j];
+	}
+
+	//wektory
+
+	qreal w_p[5] = {0};
+	qreal w_k[5][5];
+	memset(w_k, 0, sizeof w_k);
+
+	for(short i = 0; i < 5; i++)
+		for(short j = 0; j < 5; j++)
+			w_p[i] += macierz_preferencji[i][j];
+
+	for(short i = 0; i < 5; i++)
+		w_p[i] = w_p[i]/5;
+
+	for(short a = 0; a < 5; a++)
+		for(short i = 0; i < 5; i++)
+			for(short j = 0; j < 5; j++)
+				w_k[a][i] += macierz_kryteriow[a][i][j];
+
+	for(short a = 0; a < 5; a++)
+		for(short i = 0; i < 5; i++)
+			w_k[a][i] = w_k[a][i]/5;
+
+	//badanie spójności
+
+	//wyznaczanie najlepszego wariantu
+	//musi zwrócić indeks
+
+	//wylaczyc przycisk "Oblicz", aż do czasu wczytania nowych danych.
+	//wylaczyc slidery na czas dzialania funkcji
+
+
+	return 1;
 }
 
 void AhpWindow::cena2bateria(int value){
