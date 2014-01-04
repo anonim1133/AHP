@@ -32,9 +32,9 @@ void AhpWindow::openFile(){
 
 			str = stream.readLine();
 			QStringList wlasciwosci = str.split(";");
+			macierz_kryteriow_wlasciwosci[i][0] = wlasciwosci.at(0);
 			macierz_kryteriow_wlasciwosci[i][1] = wlasciwosci.at(1);
 			macierz_kryteriow_wlasciwosci[i][2] = wlasciwosci.at(2);
-			macierz_kryteriow_wlasciwosci[i][3] = wlasciwosci.at(3);
 
 			while( !stream.atEnd() ) {
 				str = stream.readLine();
@@ -57,19 +57,20 @@ void AhpWindow::openFile(){
 
 }
 
-qint8 AhpWindow::oblicz(){
+int *AhpWindow::oblicz(int wynik[]){
 	//normalizacja
 	//Wyrazy w kolumnie dzielić przez sumę wartości w kolumnie
 	qreal c[5] = {0};
-
+	qDebug() <<"Obliczam macierz preferencji"<<endl;
 	for(short i = 0; i < 5; i++)
 		for(short j = 0; j < 5; j++)
 			c[i] += macierz_preferencji[j][i];
-
+	qDebug() <<"Obliczam macierz preferencji 2/2"<<endl;
 	for(short i = 0; i < 5; i++)
 		for(short j = 0; j < 5; j++)
 			macierz_preferencji[i][j] = macierz_preferencji[i][j]/c[j];
 
+	qDebug() <<"Obliczam macierz krtyteriow"<<endl;
 	for(short a = 0; a < 5; a++){
 		for(short i = 0; i < 5; i++)
 			for(short j = 0; j < 5; j++)
@@ -79,13 +80,16 @@ qint8 AhpWindow::oblicz(){
 			for(short j = 0; j < 5; j++)
 				macierz_kryteriow[a][i][j] = macierz_kryteriow[a][i][j]/c[j];
 	}
-
+	qDebug() <<"Obliczam macierz krtyteriow"<<endl;
 	//wektory
 
 	qreal w_p[5] = {0};
+	qreal r[5] = {0};
 	qreal w_k[5][5];
+
 	memset(w_k, 0, sizeof w_k);
 
+	qDebug() <<"Obliczam wektor pref"<<endl;
 	for(short i = 0; i < 5; i++)
 		for(short j = 0; j < 5; j++)
 			w_p[i] += macierz_preferencji[i][j];
@@ -93,6 +97,7 @@ qint8 AhpWindow::oblicz(){
 	for(short i = 0; i < 5; i++)
 		w_p[i] = w_p[i]/5;
 
+	qDebug() <<"Obliczam wektor kryt"<<endl;
 	for(short a = 0; a < 5; a++)
 		for(short i = 0; i < 5; i++)
 			for(short j = 0; j < 5; j++)
@@ -103,15 +108,45 @@ qint8 AhpWindow::oblicz(){
 			w_k[a][i] = w_k[a][i]/5;
 
 	//badanie spójności
+	//RI = 1.11
+
 
 	//wyznaczanie najlepszego wariantu
 	//musi zwrócić indeks
+	qDebug() <<"wyznaczanie najlepszego wariantu"<<endl;
+	for(short i = 0; i < 5; i++)
+		for(short j = 0; j < 5; j++)
+			r[i] += w_p[j] * w_k[j][i];
 
-	//wylaczyc przycisk "Oblicz", aż do czasu wczytania nowych danych.
-	//wylaczyc slidery na czas dzialania funkcji
+	qDebug() <<"sortowanie..."<<endl;
+	qreal max = 0;
+	int poz = 0;
+	int wi = 0;
+	bool minus = false;
 
+	while(1){
+		max = 0;
+		poz = 0;
 
-	return 1;
+		for(short i = 0; i < 5; i++)
+			if(r[i] > max){
+				max = r[i];
+				poz = i;
+			}
+
+		wynik[wi++] = poz;
+		r[poz] = -1;
+
+		minus = false;
+		for(short i = 0; i < 5; i++)
+			if(r[i] > -1) minus = true;
+
+		if(minus == false) break;
+	}
+	qDebug() <<"... i po"<<endl;
+	int* p;
+	p = wynik;
+	return p;
 }
 
 void AhpWindow::cena2bateria(int value){
@@ -157,4 +192,21 @@ void AhpWindow::aparat2rozmiar(int value){
 void AhpWindow::wyswietlacz2rozmiar(int value){
 	macierz_preferencji[4][3] = value;
 	macierz_preferencji[3][4] = (qreal)1/(qreal)value;
+}
+
+void AhpWindow::on_pushButton_clicked()
+{
+
+	//wylaczyc przycisk "Oblicz", aż do czasu wczytania nowych danych.
+	//wylaczyc slidery na czas dzialania funkcji
+	//sprawdzic czy dane sa wczytane
+
+	qDebug() <<"Wejscie"<<endl;
+
+	int wynik[5];
+	oblicz(wynik);
+	for(short i = 0; i < 5; i++)
+			qDebug() <<macierz_kryteriow_wlasciwosci[wynik[i]][0]<<"I: "<<i<<" wynik:"<< wynik[i]<<endl;
+
+	qDebug() <<"wyjscie"<<endl;
 }

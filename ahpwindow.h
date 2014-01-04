@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTextStream>
+#include <QDebug>
 
 namespace Ui {
 class AhpWindow;
@@ -20,7 +21,7 @@ public:
 public slots:
 	void openFile();
 
-	qint8 oblicz();
+	int* oblicz(int wynik[]);
 
 	void cena2bateria(int value);
 	void cena2aparat(int value);
@@ -36,7 +37,10 @@ public slots:
 
 	void wyswietlacz2rozmiar(int value);
 
-private:
+	private slots:
+	void on_pushButton_clicked();
+
+	private:
     Ui::AhpWindow *ui;
 
 	qreal macierz_preferencji[5][5];
