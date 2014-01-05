@@ -6,9 +6,10 @@
 #include <QMessageBox>
 #include <QTextStream>
 #include <QDebug>
+#include "oknowynikow.h"
 
 namespace Ui {
-class AhpWindow;
+	class AhpWindow;
 }
 
 class AhpWindow : public QMainWindow{

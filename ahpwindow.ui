@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>AhpWindow</string>
+   <string>A H P</string>
   </property>
   <widget class="QWidget" name="widget">
    <property name="sizePolicy">

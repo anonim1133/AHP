@@ -60,25 +60,25 @@ void AhpWindow::openFile(){
 int *AhpWindow::oblicz(int wynik[]){
 	//normalizacja
 	//Wyrazy w kolumnie dzielić przez sumę wartości w kolumnie
-	qreal c[5] = {0};
+	qreal c[6][5] = {0};
 	qDebug() <<"Obliczam macierz preferencji"<<endl;
 	for(short i = 0; i < 5; i++)
 		for(short j = 0; j < 5; j++)
-			c[i] += macierz_preferencji[j][i];
+			c[0][i] += macierz_preferencji[j][i];
 	qDebug() <<"Obliczam macierz preferencji 2/2"<<endl;
 	for(short i = 0; i < 5; i++)
 		for(short j = 0; j < 5; j++)
-			macierz_preferencji[i][j] = macierz_preferencji[i][j]/c[j];
+			macierz_preferencji[i][j] = macierz_preferencji[i][j]/c[0][j];
 
 	qDebug() <<"Obliczam macierz krtyteriow"<<endl;
 	for(short a = 0; a < 5; a++){
 		for(short i = 0; i < 5; i++)
 			for(short j = 0; j < 5; j++)
-				c[i] += macierz_kryteriow[a][j][i];
+				c[a+1][i] += macierz_kryteriow[a][j][i];
 
 		for(short i = 0; i < 5; i++)
 			for(short j = 0; j < 5; j++)
-				macierz_kryteriow[a][i][j] = macierz_kryteriow[a][i][j]/c[j];
+				macierz_kryteriow[a][i][j] = macierz_kryteriow[a][i][j]/c[a][j];
 	}
 	qDebug() <<"Obliczam macierz krtyteriow"<<endl;
 	//wektory
@@ -108,42 +108,107 @@ int *AhpWindow::oblicz(int wynik[]){
 			w_k[a][i] = w_k[a][i]/5;
 
 	//badanie spójności
-	//RI = 1.11
+
+	bool niespojna = false;
+	qreal lambda = 0, ri = 0, ci = 0, cr = 0, prog = 0.15;
+	ri = 1.11;
+
+{//badanie spójności dla macierzy preferencji
+	lambda = 0; ci = 0; cr = 0;
+	for(short j = 0; j<5; j++)
+		lambda += c[0][j]*w_p[j];
+
+	ci = (lambda/5)/4;
+	cr = ci/ri;
+
+	if(cr>prog){
+		niespojna = true;
+		qDebug()<<"Macierz preferencji niespojna"<<endl;
 
 
-	//wyznaczanie najlepszego wariantu
-	//musi zwrócić indeks
-	qDebug() <<"wyznaczanie najlepszego wariantu"<<endl;
-	for(short i = 0; i < 5; i++)
-		for(short j = 0; j < 5; j++)
-			r[i] += w_p[j] * w_k[j][i];
+		QString blad;
+		blad.append("Macierz preferencji niespojna");
 
-	qDebug() <<"sortowanie..."<<endl;
-	qreal max = 0;
-	int poz = 0;
-	int wi = 0;
-	bool minus = false;
+		QMessageBox::critical(this, "Macierz niespójna", blad,
+							  QMessageBox::Ok | QMessageBox::Default);
+		r[0] = -1;
+		r[1] = -1;
+		r[2] = -1;
+		r[3] = -1;
+		r[4] = -1;
 
-	while(1){
-		max = 0;
-		poz = 0;
+	}else qDebug() << endl;
+}
 
-		for(short i = 0; i < 5; i++)
-			if(r[i] > max){
-				max = r[i];
-				poz = i;
+	if(!niespojna){ //Jeżeli nie jest niespójna
+		//badanie spójności dla macierzy kryteriów
+		for(short i = 1; i<6; i++){
+			lambda = 0; ci = 0; cr = 0;
+			for(short j = 0; j<5; j++)
+				lambda += c[i][j]*w_k[i-1][j];
+
+			ci = (lambda/5)/4;
+			cr = ci/ri;
+		if(cr>prog){
+				qDebug()<<"Macierz "<<i<<"niespójna"<<endl;
+
+
+				QString blad;
+				blad.append("Macierz ");
+				blad.append(QString("%1").arg(i));
+				blad.append(" niespójna.");
+
+				QMessageBox::critical(this, "Macierz niespójna", blad,
+									  QMessageBox::Ok | QMessageBox::Default);
+
+				niespojna = true;
+				break;
 			}
-
-		wynik[wi++] = poz;
-		r[poz] = -1;
-
-		minus = false;
-		for(short i = 0; i < 5; i++)
-			if(r[i] > -1) minus = true;
-
-		if(minus == false) break;
+		}
 	}
-	qDebug() <<"... i po"<<endl;
+
+	if(!niespojna){ //Jeżeli żadna nie jest niespójna; wszystkie są spójne
+		//wyznaczanie najlepszego wariantu
+		//musi zwrócić indeks
+		qDebug() <<"wyznaczanie najlepszego wariantu"<<endl;
+		for(short i = 0; i < 5; i++)
+			for(short j = 0; j < 5; j++)
+				r[i] += w_p[j] * w_k[j][i];
+
+		qDebug() <<"sortowanie..."<<endl;
+		qreal max = 0;
+		int poz = 0;
+		int wi = 0;
+		bool minus = false;
+
+		while(1){
+			max = 0;
+			poz = 0;
+
+			for(short i = 0; i < 5; i++)
+				if(r[i] > max){
+					max = r[i];
+					poz = i;
+				}
+
+			wynik[wi++] = poz;
+			r[poz] = -1;
+
+			minus = false;
+			for(short i = 0; i < 5; i++)
+				if(r[i] > -1) minus = true;
+
+			if(minus == false) break;
+		}
+		qDebug() <<"... i po"<<endl;
+
+	}else{
+		qDebug() <<"Ustawiam wynik na -1"<<endl;
+		for(short i=0; i<5; i++)
+			wynik[i] = -1;
+	}
+
+	qDebug() <<"Zwracam wyniki"<<endl;
 	int* p;
 	p = wynik;
 	return p;
@@ -205,8 +270,27 @@ void AhpWindow::on_pushButton_clicked()
 
 	int wynik[5];
 	oblicz(wynik);
-	for(short i = 0; i < 5; i++)
-			qDebug() <<macierz_kryteriow_wlasciwosci[wynik[i]][0]<<"I: "<<i<<" wynik:"<< wynik[i]<<endl;
 
 	qDebug() <<"wyjscie"<<endl;
+
+	if(wynik[0] == -1 || wynik[1] == -1 || wynik[2] == -1 || wynik[3] == -1 || wynik[4] == -1 ) qDebug() << "onpusz -> Macierz niespojna"<<endl;
+	else {
+		int w = wynik[0];
+
+		qDebug() << "Wszystko gra, wyświetlam wyniki."<<endl;
+
+		for(short i = 0; i < 5; i++)
+			qDebug() <<macierz_kryteriow_wlasciwosci[wynik[i]][0]<<"I: "<<i<<" wynik:"<< wynik[i]<<endl;
+
+		oknoWynikow* okno = new oknoWynikow(this);
+		okno->show();
+		okno->pokazWynik(macierz_kryteriow_wlasciwosci[w][1], macierz_kryteriow_wlasciwosci[w][0], macierz_kryteriow_wlasciwosci[w][2]);
+	}
+
+	qDebug() << "Wyswietlam"<<endl;
+	oknoWynikow* okno = new oknoWynikow(this);
+	okno->show();
+
+	okno->pokazWynik(macierz_kryteriow_wlasciwosci[1][1], macierz_kryteriow_wlasciwosci[1][0], macierz_kryteriow_wlasciwosci[1][2]);
+	qDebug() << "Juz nie"<<endl;
 }

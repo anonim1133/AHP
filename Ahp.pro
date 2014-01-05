@@ -13,11 +13,14 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        ahpwindow.cpp
+        ahpwindow.cpp \
+    oknowynikow.cpp
 
-HEADERS  += ahpwindow.h
+HEADERS  += ahpwindow.h \
+    oknowynikow.h
 
-FORMS    += ahpwindow.ui
+FORMS    += ahpwindow.ui \
+    oknowynikow.ui
 
 OTHER_FILES += \
     ku880.ahp \
