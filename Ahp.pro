@@ -32,4 +32,5 @@ OTHER_FILES += \
     dane/l7.ahp \
     dane/ku880.ahp \
     dane/ke850.ahp \
-    dane/ke770.ahp
+    dane/ke770.ahp \
+    dane/przedmioty

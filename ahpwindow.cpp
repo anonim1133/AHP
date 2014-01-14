@@ -24,17 +24,27 @@ void AhpWindow::openFile(){
 		qint8 j = 0,k = 0;
 		QString str;
 
+		qDebug() <<"Plik: "<<file_name<<endl;
+
 		QFile file(file_name);
 		if (!file.open (QIODevice::ReadOnly))
 			QMessageBox::critical(this, "Blad podczas otwierania pliku", "Upewnij sie, czy plik istnieje",
 								  QMessageBox::Ok | QMessageBox::Default);
 			QTextStream stream( &file );
 
-			str = stream.readLine();
-			QStringList wlasciwosci = str.split(";");
-			macierz_kryteriow_wlasciwosci[i][0] = wlasciwosci.at(0);
-			macierz_kryteriow_wlasciwosci[i][1] = wlasciwosci.at(1);
-			macierz_kryteriow_wlasciwosci[i][2] = wlasciwosci.at(2);
+			if(!file_name.contains(QRegExp("ahp$"))){
+
+				qint8 l = 0;
+				while( !stream.atEnd() ) {
+					str = stream.readLine();
+					QStringList wlasciwosci = str.split(";");
+					macierz_kryteriow_wlasciwosci[l][0] = wlasciwosci.at(0);
+					macierz_kryteriow_wlasciwosci[l][1] = wlasciwosci.at(1);
+					macierz_kryteriow_wlasciwosci[l][2] = wlasciwosci.at(2);
+					l++;
+				}
+
+			}
 
 			while( !stream.atEnd() ) {
 				str = stream.readLine();
@@ -45,7 +55,7 @@ void AhpWindow::openFile(){
 				QStringList wartosci = str.split(",");
 
 				foreach (QString var, wartosci) {
-					macierz_kryteriow[i][j][k] = var.toInt();
+					macierz_kryteriow[i][j][k] = var.toFloat();
 					k++;
 				}
 
@@ -53,6 +63,8 @@ void AhpWindow::openFile(){
 			}
 			file.close();
 		i++;
+
+		if( i == 6 ) ui->pushButton->setDisabled(false);
 	}
 
 }
@@ -151,7 +163,7 @@ int *AhpWindow::oblicz(int wynik[]){
 			cr = ci/ri;
 		if(cr>prog){
 				qDebug()<<"Macierz "<<i<<"niespójna"<<endl;
-
+				niespojna = true;
 
 				QString blad;
 				blad.append("Macierz ");
@@ -161,7 +173,6 @@ int *AhpWindow::oblicz(int wynik[]){
 				QMessageBox::critical(this, "Macierz niespójna", blad,
 									  QMessageBox::Ok | QMessageBox::Default);
 
-				niespojna = true;
 				break;
 			}
 		}
@@ -207,6 +218,8 @@ int *AhpWindow::oblicz(int wynik[]){
 		for(short i=0; i<5; i++)
 			wynik[i] = -1;
 	}
+
+	ui->pushButton->setDisabled(true);
 
 	qDebug() <<"Zwracam wyniki"<<endl;
 	int* p;
@@ -273,8 +286,9 @@ void AhpWindow::on_pushButton_clicked()
 
 	qDebug() <<"wyjscie"<<endl;
 
-	if(wynik[0] == -1 || wynik[1] == -1 || wynik[2] == -1 || wynik[3] == -1 || wynik[4] == -1 ) qDebug() << "onpusz -> Macierz niespojna"<<endl;
-	else {
+	if(wynik[0] == -1 || wynik[1] == -1 || wynik[2] == -1 || wynik[3] == -1 || wynik[4] == -1 ){
+		qDebug() << "onpusz -> Macierz niespojna"<<endl;
+	}else{
 		int w = wynik[0];
 
 		qDebug() << "Wszystko gra, wyświetlam wyniki."<<endl;
